@@ -11,4 +11,4 @@ all:
 
 .PHONY: clean
 clean:
-	rm -rf $(EXE)
+	rm $(EXE)
