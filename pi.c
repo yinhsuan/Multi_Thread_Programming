@@ -18,7 +18,6 @@ void* calculate (void* rank) {
         double x = (double) rand_r(&seed)/RAND_MAX;
         double y = (double) rand_r(&seed)/RAND_MAX;
         double distanceSquared = x * x + y * y;
-
         if (distanceSquared <= 1) {
             localCircle++;
         }
