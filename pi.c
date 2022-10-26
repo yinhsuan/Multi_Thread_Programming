@@ -7,15 +7,18 @@ int threadCount = 0;
 long long numberOfTosses = 0;
 long long numberInCircle = 0;
 pthread_mutex_t mutex;
+unsigned int globalSeed = 0;
 
 void* calculate (void* rank) {
     long localCircle = 0;
     long long count = numberOfTosses / threadCount;
+    unsigned int seed = rand_r(&globalSeed);
+
     for (long long toss=0; toss < count; toss++) {
-        double x = drand48();
-        double y = drand48();
-        // printf("%lf, %lf\n", x, y);
+        double x = (double) rand_r(&seed)/RAND_MAX;
+        double y = (double) rand_r(&seed)/RAND_MAX;
         double distanceSquared = x * x + y * y;
+
         if (distanceSquared <= 1) {
             localCircle++;
         }
