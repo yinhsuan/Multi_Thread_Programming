@@ -9,6 +9,7 @@ long long numberInCircle = 0;
 pthread_mutex_t mutex;
 
 void* calculate (void* rank) {
+    long localCircle = 0;
     long long count = numberOfTosses / threadCount;
     for (long long toss=0; toss < count; toss++) {
         double x = drand48();
@@ -16,11 +17,13 @@ void* calculate (void* rank) {
         // printf("%lf, %lf\n", x, y);
         double distanceSquared = x * x + y * y;
         if (distanceSquared <= 1) {
-            pthread_mutex_lock(&mutex);
-            numberInCircle++;
-            pthread_mutex_unlock(&mutex);
+            localCircle++;
         }
     }
+    pthread_mutex_lock(&mutex);
+    numberInCircle += localCircle;
+    pthread_mutex_unlock(&mutex);
+
     return NULL;
 }
 
