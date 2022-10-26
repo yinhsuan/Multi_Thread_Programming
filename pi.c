@@ -1,10 +1,12 @@
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-using namespace std;
+#include <pthread.h>
+
 
 int main (int argc, char* argv[]) {
     if (argc < 3) {
-        cout << "Format: ./pi.out <#thread> <#toss>" << endl;
+        printf("Format: ./pi.out <#thread> <#toss>\n");
         exit(1);
     }
     long long int numberInCircle = 0;
@@ -22,7 +24,7 @@ int main (int argc, char* argv[]) {
         }
     }
     double piEstimate = 4 * numberInCircle /((double) numberOfTosses);
-    cout << piEstimate << endl;
+    printf("%lf\n", piEstimate);
 
     return 0;
 }

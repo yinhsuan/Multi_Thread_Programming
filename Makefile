@@ -1,7 +1,7 @@
-CC = g++
+CC = gcc
 CFLAGS = -pg
 EXE = pi.out
-FILE = pi.cpp
+FILE = pi.c
 
 all:
 	$(CC) $(CFLAGS) $(FILE) -o $(EXE)
