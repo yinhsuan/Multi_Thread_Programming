@@ -34,13 +34,13 @@ int main (int argc, char* argv[]) {
     pthread_t threads[threadCount];
 
     for (long thread=0; thread<threadCount; thread++) {
-        pthread_create(&threads[thread], NULL, calculate, (void*) thread);
+        pthread_create(&threads[thread], NULL, calculate, (void*)thread);
     }
     for (long thread=0; thread<threadCount; thread++) {
         pthread_join(threads[thread], &status);
         numberInCircle += *(long long*)status;
     }
-    double piEstimate = 4 * numberInCircle / ((double) numberOfTosses);
+    double piEstimate = 4 * numberInCircle / ((double)numberOfTosses);
     printf("%lf\n", piEstimate);
 
     pthread_exit(NULL);
