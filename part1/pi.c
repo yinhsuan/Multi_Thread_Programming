@@ -10,6 +10,9 @@ long long numberInCircle = 0;
 void* calculate (void* threadId) {
     long long *localCircle = (long long *)malloc(sizeof(long long));
     long long count = numberOfTosses / threadCount;
+    long long remain = numberOfTosses % threadCount;
+    long longTid = (long)threadId;
+    int tid = (int)longTid;
     unsigned int seed = (long)threadId + 1;
 
     for (long long toss=0; toss < count; toss++) {
@@ -20,6 +23,18 @@ void* calculate (void* threadId) {
             *localCircle+=1;
         }
     }
+    // if numberOfTosses is not well devided by thread#
+    if (tid == 0) {
+        for (long long toss=0; toss<remain; toss++) {
+            double x = (double) rand_r(&seed)/RAND_MAX;
+            double y = (double) rand_r(&seed)/RAND_MAX;
+            double distanceSquared = x * x + y * y;
+            if (distanceSquared <= 1) {
+                *localCircle+=1;
+            }
+        }
+    }
+
     pthread_exit((void *)localCircle);
 }
 
