@@ -6,27 +6,21 @@
 int threadCount = 0;
 long long numberOfTosses = 0;
 long long numberInCircle = 0;
-pthread_mutex_t mutex;
-unsigned int globalSeed = 0;
 
-void* calculate (void* rank) {
-    long localCircle = 0;
+void* calculate (void* threadId) {
+    long long *localCircle = (long long *)malloc(sizeof(long long));
     long long count = numberOfTosses / threadCount;
-    unsigned int seed = rand_r(&globalSeed);
+    unsigned int seed = (long)threadId + 1;
 
     for (long long toss=0; toss < count; toss++) {
         double x = (double) rand_r(&seed)/RAND_MAX;
         double y = (double) rand_r(&seed)/RAND_MAX;
         double distanceSquared = x * x + y * y;
         if (distanceSquared <= 1) {
-            localCircle++;
+            *localCircle+=1;
         }
     }
-    pthread_mutex_lock(&mutex);
-    numberInCircle += localCircle;
-    pthread_mutex_unlock(&mutex);
-
-    return NULL;
+    pthread_exit((void *)localCircle);
 }
 
 int main (int argc, char* argv[]) {
@@ -34,23 +28,21 @@ int main (int argc, char* argv[]) {
         printf("Format: ./pi.out <#thread> <#toss>\n");
         exit(1);
     }
-    pthread_t* threadHandles;
+    void *status;
     threadCount = atoi(argv[1]);
     numberOfTosses = strtoll(argv[2], NULL, 10);
-    threadHandles = (pthread_t*) malloc(threadCount*sizeof(pthread_t));
-    pthread_mutex_init(&mutex, NULL);
+    pthread_t threads[threadCount];
 
     for (long thread=0; thread<threadCount; thread++) {
-        pthread_create(&threadHandles[thread], NULL, calculate, (void*) thread);
+        pthread_create(&threads[thread], NULL, calculate, (void*) thread);
     }
     for (long thread=0; thread<threadCount; thread++) {
-        pthread_join(threadHandles[thread], NULL);
+        pthread_join(threads[thread], &status);
+        numberInCircle += *(long long*)status;
     }
-    pthread_mutex_destroy(&mutex);
-    free(threadHandles);
-
     double piEstimate = 4 * numberInCircle / ((double) numberOfTosses);
     printf("%lf\n", piEstimate);
 
+    pthread_exit(NULL);
     return 0;
 }
