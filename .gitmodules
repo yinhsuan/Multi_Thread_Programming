@@ -1,0 +1,3 @@
+[submodule "part1/part1/SIMDxorshift"]
+	path = part1/part1/SIMDxorshift
+	url = https://github.com/lemire/SIMDxorshift
