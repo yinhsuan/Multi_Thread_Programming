@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+# include <nmmintrin.h>
+# include <atomic>
+#include "./SIMDxorshift/include/simdxorshift128plus.h"
 
 int threadCount = 0;
 long long numberOfTosses = 0;
@@ -9,32 +12,55 @@ long long numberInCircle = 0;
 
 void* calculate (void* threadId) {
     long long *localCircle = (long long *)malloc(sizeof(long long));
-    long long count = numberOfTosses / threadCount;
-    long long remain = numberOfTosses % threadCount;
+    *localCircle = 0;
+    long long tossNum = numberOfTosses / threadCount;
+    long long remainNum = numberOfTosses % threadCount;
     long longTid = (long)threadId;
     int tid = (int)longTid;
-    unsigned int seed = (long)threadId + 1;
 
-    for (long long toss=0; toss < count; toss++) {
-        double x = (double) rand_r(&seed)/RAND_MAX;
-        double y = (double) rand_r(&seed)/RAND_MAX;
-        double distanceSquared = x * x + y * y;
-        if (distanceSquared <= 1) {
-            *localCircle+=1;
-        }
+    avx_xorshift128plus_key_t mykey;
+    avx_xorshift128plus_init(324, 4444, &mykey);
+
+    __m256 MAX = _mm256_set1_ps(INT32_MAX);
+    __m256 ONES = _mm256_set1_ps(1.0f);
+
+    __m256i randomX, randomY;
+    __m256 floatX, floatY, x, y, distanceSquared, mask;
+    unsigned int hits;
+
+    for (long long toss=0; toss < tossNum; toss+=8) {
+        randomX =  avx_xorshift128plus(&mykey);
+        randomY =  avx_xorshift128plus(&mykey);
+
+        floatX = _mm256_cvtepi32_ps(randomX);
+        floatY = _mm256_cvtepi32_ps(randomY);
+
+        x = _mm256_div_ps(floatX, MAX);
+        y = _mm256_div_ps(floatY, MAX);
+
+        distanceSquared = _mm256_add_ps(_mm256_mul_ps(x, x), _mm256_mul_ps(y, y));
+        mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
+        hits = _mm256_movemask_ps(mask);
+        *localCircle += _mm_popcnt_u32(hits);
     }
     // if numberOfTosses is not well devided by thread#
     if (tid == 0) {
-        for (long long toss=0; toss<remain; toss++) {
-            double x = (double) rand_r(&seed)/RAND_MAX;
-            double y = (double) rand_r(&seed)/RAND_MAX;
-            double distanceSquared = x * x + y * y;
-            if (distanceSquared <= 1) {
-                *localCircle+=1;
-            }
+        for (long long toss=0; toss<remainNum; toss++) {
+           randomX =  avx_xorshift128plus(&mykey);
+            randomY =  avx_xorshift128plus(&mykey);
+
+            floatX = _mm256_cvtepi32_ps(randomX);
+            floatY = _mm256_cvtepi32_ps(randomY);
+
+            x = _mm256_div_ps(floatX, MAX);
+            y = _mm256_div_ps(floatY, MAX);
+
+            distanceSquared = _mm256_add_ps(_mm256_mul_ps(x, x), _mm256_mul_ps(y, y));
+            mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
+            hits = _mm256_movemask_ps(mask);
+            *localCircle += _mm_popcnt_u32(hits);
         }
     }
-
     pthread_exit((void *)localCircle);
 }
 
