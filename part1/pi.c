@@ -25,35 +25,39 @@ void* calculate (void* threadId) {
     __m256 ONES = _mm256_set1_ps(1.0f);
 
     __m256i randomX, randomY;
-    __m256 floatX, floatY, x, y, distanceSquared, mask;
+    __m256 floatX, floatY, randX, randY, distanceSquared, mask;
     unsigned int hits;
 
     for (long long toss=0; toss < tossNum; toss+=8) {
+        // Return a 256-bit random "number"
         randomX =  avx_xorshift128plus(&mykey);
         randomY =  avx_xorshift128plus(&mykey);
 
+        // Converts 8 int to 8 float
         floatX = _mm256_cvtepi32_ps(randomX);
         floatY = _mm256_cvtepi32_ps(randomY);
 
-        x = _mm256_div_ps(floatX, MAX);
-        y = _mm256_div_ps(floatY, MAX);
+        // Get random number [-1, 1]
+        randX = _mm256_div_ps(floatX, MAX);
+        randY = _mm256_div_ps(floatY, MAX);
 
-        distanceSquared = _mm256_add_ps(_mm256_mul_ps(x, x), _mm256_mul_ps(y, y));
+        distanceSquared = _mm256_add_ps(_mm256_mul_ps(randX, randX), _mm256_mul_ps(ramdY, ramdY));
         mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
+        // Calculate a number of bits set to 1
         hits = _mm256_movemask_ps(mask);
         *localCircle += _mm_popcnt_u32(hits);
     }
     // if numberOfTosses is not well devided by thread#
     if (tid == 0) {
-        for (long long toss=0; toss<remainNum; toss++) {
-           randomX =  avx_xorshift128plus(&mykey);
+        for (long long toss=0; toss<remainNum; toss+=8) {
+            randomX =  avx_xorshift128plus(&mykey);
             randomY =  avx_xorshift128plus(&mykey);
 
             floatX = _mm256_cvtepi32_ps(randomX);
             floatY = _mm256_cvtepi32_ps(randomY);
 
-            x = _mm256_div_ps(floatX, MAX);
-            y = _mm256_div_ps(floatY, MAX);
+            randX = _mm256_div_ps(floatX, MAX);
+            randY = _mm256_div_ps(floatY, MAX);
 
             distanceSquared = _mm256_add_ps(_mm256_mul_ps(x, x), _mm256_mul_ps(y, y));
             mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
