@@ -1,7 +1,7 @@
-CC = gcc
+CC = g++
 EXE = pi.out
 FILE = pi.c
-INS := ./SIMDxorshift/src/xorshift128plus.c ./SIMDxorshift/src/simdxorshift128plus.c
+INS = ./SIMDxorshift/src/xorshift128plus.c ./SIMDxorshift/src/simdxorshift128plus.c
 
 # minimalist makefile
 .SUFFIXES:
@@ -13,20 +13,22 @@ else
 CFLAGS = -fPIC -std=c99 -O3 -mavx2  -march=native -Wall -Wextra -pedantic -Wshadow
 endif # debug
 
-HEADERS=include/simdxorshift128plus.h  include/xorshift128plus.h
+HEADERS= SIMDxorshift/include/simdxorshift128plus.h  SIMDxorshift/include/xorshift128plus.h
 
 OBJECTS= simdxorshift128plus.o xorshift128plus.o
 
-all: $(OBJECTS) fillarray shuffle
+# all: $(OBJECTS) fillarray shuffle
 
-xorshift128plus.o: ./src/xorshift128plus.c $(HEADERS)
-	$(CC) $(CFLAGS) -c ./src/xorshift128plus.c -Iinclude
-
-simdxorshift128plus.o: ./src/simdxorshift128plus.c $(HEADERS)
-	$(CC) $(CFLAGS) -c ./src/simdxorshift128plus.c -Iinclude
-
-$(EXE): $(HEADERS)  $(OBJECTS)
+$(EXE): $(HEADERS)  $(OBJECTS) $(FILE)
 	$(CC) $(INS) $(CFLAGS) -o $(EXE) $(FILE) $(OBJECTS) -Iinclude -flto
+
+xorshift128plus.o: ./SIMDxorshift/src/xorshift128plus.c $(HEADERS)
+	$(CC) $(CFLAGS) -c ./SIMDxorshift/src/xorshift128plus.c -Iinclude
+
+simdxorshift128plus.o: ./SIMDxorshift/src/simdxorshift128plus.c $(HEADERS)
+	$(CC) $(CFLAGS) -c ./SIMDxorshift/src/simdxorshift128plus.c -Iinclude
+
+
 
 clean:
 	rm -f $(OBJECTS) fillarray shuffle
