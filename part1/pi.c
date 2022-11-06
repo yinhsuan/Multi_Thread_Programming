@@ -41,7 +41,7 @@ void* calculate (void* threadId) {
         randX = _mm256_div_ps(floatX, MAX);
         randY = _mm256_div_ps(floatY, MAX);
 
-        distanceSquared = _mm256_add_ps(_mm256_mul_ps(randX, randX), _mm256_mul_ps(ramdY, ramdY));
+        distanceSquared = _mm256_add_ps(_mm256_mul_ps(randX, randX), _mm256_mul_ps(randY, randY));
         mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
         // Calculate a number of bits set to 1
         hits = _mm256_movemask_ps(mask);
@@ -59,7 +59,7 @@ void* calculate (void* threadId) {
             randX = _mm256_div_ps(floatX, MAX);
             randY = _mm256_div_ps(floatY, MAX);
 
-            distanceSquared = _mm256_add_ps(_mm256_mul_ps(x, x), _mm256_mul_ps(y, y));
+            distanceSquared = _mm256_add_ps(_mm256_mul_ps(randX, randX), _mm256_mul_ps(randY, randY));
             mask = _mm256_cmp_ps(distanceSquared, ONES, _CMP_LE_OQ);
             hits = _mm256_movemask_ps(mask);
             *localCircle += _mm_popcnt_u32(hits);
