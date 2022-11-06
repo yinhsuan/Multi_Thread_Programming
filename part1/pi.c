@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
-# include <nmmintrin.h>
-# include <atomic>
+# include <immintrin.h>
 #include "./SIMDxorshift/include/simdxorshift128plus.h"
 
 int threadCount = 0;
