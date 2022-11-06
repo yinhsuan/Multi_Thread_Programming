@@ -3,16 +3,13 @@ CFLAGS=-fPIC -std=c99 -g3 -O3 -I. -I${INC} -mavx2 -march=native -Wall -Wextra -p
 EXE=pi.out
 SRC=pi.c
 
-SRC+=./SIMDxorshift/src/simdxorshift128plus.c
-SRC+=./SIMDxorshift/src/xorshift128plus.c
-
 INC=./SIMDxorshift/include
 
-OBJ=${SRC:.c=.o}
+OBJ= ./SIMDxorshift/src/simdxorshift128plus.o ./SIMDxorshift/src/xorshift128plus.o
 
 all: ${EXE}
 
-${EXE}:${OBJ}
+${EXE}: $(OBJ) $(SRC)
 	${CXX} ${CFLAGS} $^ -o $@ -lpthread
 
 %.o:%.c
