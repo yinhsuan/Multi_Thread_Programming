@@ -1,34 +1,24 @@
-CC = g++
-EXE = pi.out
-FILE = pi.c
-INS = ./SIMDxorshift/src/xorshift128plus.c ./SIMDxorshift/src/simdxorshift128plus.c
+CXX=gcc
+CFLAGS=-fPIC -std=c99 -g3 -O3 -I. -I${INC} -mavx2 -march=native -Wall -Wextra -pedantic -Wshadow
+EXE=pi.out
+SRC=pi.c
 
-# minimalist makefile
-.SUFFIXES:
-#
-.SUFFIXES: .cpp .o .c .h
-ifeq ($(DEBUG),1)
-CFLAGS = -fPIC  -std=c99 -ggdb -mavx2 -march=native -Wall -Wextra -pedantic -Wshadow -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
-else
-CFLAGS = -fPIC -std=c99 -O3 -mavx2  -march=native -Wall -Wextra -pedantic -Wshadow
-endif # debug
+SRC+=./SIMDxorshift/src/simdxorshift128plus.c
+SRC+=./SIMDxorshift/src/xorshift128plus.c
 
-HEADERS= SIMDxorshift/include/simdxorshift128plus.h  SIMDxorshift/include/xorshift128plus.h
+INC=./SIMDxorshift/include
 
-OBJECTS= simdxorshift128plus.o xorshift128plus.o
+OBJ=${SRC:.c=.o}
 
-# all: $(OBJECTS) fillarray shuffle
+all: ${EXE}
 
-$(EXE): $(HEADERS)  $(OBJECTS) $(FILE)
-	$(CC) $(INS) $(CFLAGS) -o $(EXE) $(FILE) $(OBJECTS) -Iinclude -flto
+${EXE}:${OBJ}
+	${CXX} ${CFLAGS} $^ -o $@ -lpthread
 
-xorshift128plus.o: ./SIMDxorshift/src/xorshift128plus.c $(HEADERS)
-	$(CC) $(CFLAGS) -c ./SIMDxorshift/src/xorshift128plus.c -Iinclude
+%.o:%.c
+	${CXX} ${CFLAGS} -c $^ -o $@
 
-simdxorshift128plus.o: ./SIMDxorshift/src/simdxorshift128plus.c $(HEADERS)
-	$(CC) $(CFLAGS) -c ./SIMDxorshift/src/simdxorshift128plus.c -Iinclude
-
-
+.PHONY: clean
 
 clean:
-	rm -f $(OBJECTS) fillarray shuffle
+	rm -rf ${EXE} *.out ${OBJ}
