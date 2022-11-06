@@ -37,23 +37,31 @@ void workerThreadStart(WorkerArgs *const args)
     // Of course, you can copy mandelbrotSerial() to this file and 
     // modify it to pursue a better performance.
 
-    // for (int i=args->threadId; i<args->height; i+=args->numThreads) {
-    //      mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
-    //                       args->width, args->height,
-    //                       i, 1,
-    //                       args->maxIterations,
-    //                       args->output);
+    double startTime = CycleTimer::currentSeconds();
+
+    // Original
+    // int count = args->height / args->numThreads;
+    // int startRow = args->threadId * count;
+    // if (args->threadId == (args->numThreads-1)) {
+    //     count += args->height % args->numThreads;
     // }
-    int count = args->height / args->numThreads;
-    int startRow = args->threadId * count;
-    if (args->threadId == (args->numThreads-1)) {
-        count += args->height % args->numThreads;
-    }
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+    // mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+    //                     args->width, args->height,
+    //                     startRow, count,
+    //                     args->maxIterations,
+    //                     args->output);
+
+    // After Improvement
+    for (int i=args->threadId; i<args->height; i+=args->numThreads) {
+        mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
                         args->width, args->height,
-                        startRow, count,
+                        i, 1,
                         args->maxIterations,
                         args->output);
+    }
+
+    double endTime = CycleTimer::currentSeconds();
+    printf("[mandelbrot thread %d]:\t\t[%.3f] ms\n", args->threadId, (endTime - startTime) * 1000);
 }
 
 //
