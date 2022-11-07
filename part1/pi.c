@@ -3,10 +3,10 @@
 #include <time.h>
 #include <pthread.h>
 #include <immintrin.h>
-// #include "sse2neon.h"
+// #include "./sse2neon/sse2neon.h"
 // #include <xmmintrin.h>
 // #include <emmintrin.h>
-#include <nmmintrin.h>
+// #include <nmmintrin.h>
 // REFERENCE: https://github.com/f4exb/cm256cc/blob/master/sse2neon.h
 
 int threadCount = 0;
@@ -32,8 +32,9 @@ void* calculate (void* threadId) {
     // __m256 MAX = _mm256_set1_ps(INT32_MAX);
     // __m256 ONES = _mm256_set1_ps(1.0f);
     // __m128i MAX = _mm_set1_epi32(INT32_MAX);
-    __m128i ONEI = _mm_set1_epi32(1);
-    __m128 ONE = _mm_cvtepi32_ps(ONEI);
+    // __m128i ONEI = _mm_set1_epi32(1);
+    // __m128 ONE = _mm_cvtepi32_ps(ONEI);
+    __m128 ONE = _mm_set_ps1(1.f);
 
     // __m256i randomX, randomY;
     // __m256 floatX, floatY, randX, randY, distanceSquared, mask;
