@@ -52,7 +52,7 @@ void workerThreadStart(WorkerArgs *const args)
     //                     args->output);
 
     // After Improvement
-    for (int i=args->threadId; i<args->height; i+=args->numThreads) {
+    for (unsigned int i=args->threadId; i<args->height; i+=args->numThreads) {
         mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
                         args->width, args->height,
                         i, 1,
