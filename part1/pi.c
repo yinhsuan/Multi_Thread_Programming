@@ -13,10 +13,6 @@ int threadCount = 0;
 long long numberOfTosses = 0;
 long long numberInCircle = 0;
 
-float genRand(unsigned int seed) {
-    return (float)rand_r(&seed)/RAND_MAX;
-}
-
 void* calculate (void* threadId) {
     long long *localCircle = (long long *)malloc(sizeof(long long));
     *localCircle = 0;
@@ -60,8 +56,8 @@ void* calculate (void* threadId) {
         // randY = _mm256_div_ps(floatY, MAX);
 
 
-        randX = _mm_set_ps(genRand(seed), genRand(seed), genRand(seed), genRand(seed));
-        randY = _mm_set_ps(genRand(seed), genRand(seed), genRand(seed), genRand(seed));
+        randX = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
+        randY = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
         distanceSquared = _mm_add_ps(_mm_mul_ps(randX, randX), _mm_mul_ps(randY, randY));
         
         // _mm_store_ps(val, distanceSquared);
