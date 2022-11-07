@@ -3,9 +3,10 @@
 #include <time.h>
 #include <pthread.h>
 #include <immintrin.h>
-#include <xmmintrin.h>
-#include <emmintrin.h>
-#include "./sse2neon/sse2neon.h"
+// #include "sse2neon.h"
+// #include <xmmintrin.h>
+// #include <emmintrin.h>
+#include <nmmintrin.h>
 // REFERENCE: https://github.com/f4exb/cm256cc/blob/master/sse2neon.h
 
 int threadCount = 0;
@@ -70,7 +71,7 @@ void* calculate (void* threadId) {
         // }
         mask = _mm_cmple_ps(distanceSquared, ONE);
         hits = _mm_movemask_ps(mask);
-        *localCircle += (long long)_mm_popcnt_u32(hits);
+        *localCircle += _mm_popcnt_u32(hits);
     }
     // if numberOfTosses is not well devided by thread#
     if (tid == 0) {
@@ -87,7 +88,7 @@ void* calculate (void* threadId) {
             // }
             mask = _mm_cmple_ps(distanceSquared, ONE);
             hits = _mm_movemask_ps(mask);
-            *localCircle += (long long)_mm_popcnt_u32(hits);
+            *localCircle += _mm_popcnt_u32(hits);
         }
     }
     pthread_exit((void *)localCircle);

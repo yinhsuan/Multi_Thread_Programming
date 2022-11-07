@@ -1,5 +1,5 @@
 CXX=gcc
-CFLAG=-I./common -O3 -std=c++17 -Wall
+CFLAG=-I./common -O3 -std=c99 -Wall -mfpu=neon
 LFLAG=-lpthread
 EXE=pi.out
 SRC=pi.c
