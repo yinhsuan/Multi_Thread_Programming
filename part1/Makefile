@@ -1,17 +1,18 @@
 CXX=gcc
-CFLAGS=-fPIC -std=c99 -g3 -O3 -I. -I${INC} -mavx2 -march=native -Wall -Wextra -pedantic -Wshadow
+CFLAG=-I./common -O3 -std=c++17 -Wall
+LFLAG=-lpthread
 EXE=pi.out
-FILE=pi.c
-INC=./SIMDxorshift/include
-OBJ= ./SIMDxorshift/src/simdxorshift128plus.o ./SIMDxorshift/src/xorshift128plus.o
+SRC=pi.c
+
+OBJ=${SRC:.c=.o}
 
 all: ${EXE}
 
-${EXE}: $(OBJ) $(FILE)
-	${CXX} ${CFLAGS} $^ -o $@ -lpthread
+${EXE}:${OBJ}
+	${CXX} ${CFLAG} $^ -o $@ ${LFLAG}
 
 %.o:%.c
-	${CXX} ${CFLAGS} -c $^ -o $@
+	${CXX} ${CFLAG} -c $^ -o $@
 
 .PHONY: clean
 

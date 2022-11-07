@@ -24,7 +24,7 @@ void* calculate (void* threadId) {
 
     // __m256 MAX = _mm256_set1_ps(INT32_MAX);
     // __m256 ONES = _mm256_set1_ps(1.0f);
-    __m128i MAX = _mm_set1_epi32(INT32_MAX);
+    // __m128i MAX = _mm_set1_epi32(INT32_MAX);
     __m128i ONEI = _mm_set1_epi32(1);
     __m128 ONE = _mm_cvtepi32_ps(ONEI);
 
@@ -33,7 +33,7 @@ void* calculate (void* threadId) {
     unsigned int result[4];
     __m128i randomX, randomY;
     __m128 floatX, floatY, randX, randY, distanceSquared, mask;
-    int hits;
+    unsigned int hits;
     float val[4];
 
     for (long long toss=0; toss < tossNum; toss+=4) {
@@ -56,15 +56,15 @@ void* calculate (void* threadId) {
         randY = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
         distanceSquared = _mm_add_ps(_mm_mul_ps(randX, randX), _mm_mul_ps(randY, randY));
         
-        // _mm_store_ps(val, distanceSquared);
-        // for (int i = 0; i < 4; i++){
-        //     if (val[i] <= 1.f) {
-        //         *localCircle += 1;
-        //     }
-        // }
-        mask = _mm_cmple_ps(distanceSquared, ONE);
-        hits = _mm_movemask_ps(mask);
-        *localCircle += _mm_popcnt_u32(hits);
+        _mm_store_ps(val, distanceSquared);
+        for (int i = 0; i < 4; i++){
+            if (val[i] <= 1.f) {
+                *localCircle += 1;
+            }
+        }
+        // mask = _mm_cmple_ps(distanceSquared, ONE);
+        // hits = _mm_movemask_ps(mask);
+        // *localCircle += _mm_popcnt_u32(hits);
     }
     // if numberOfTosses is not well devided by thread#
     if (tid == 0) {
@@ -73,9 +73,15 @@ void* calculate (void* threadId) {
             randY = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
             distanceSquared = _mm_add_ps(_mm_mul_ps(randX, randX), _mm_mul_ps(randY, randY));
 
-            mask = _mm_cmple_ps(distanceSquared, ONE);
-            hits = _mm_movemask_ps(mask);
-            *localCircle += _mm_popcnt_u32(hits);
+            _mm_store_ps(val, distanceSquared);
+            for (int i = 0; i < 4; i++){
+                if (val[i] <= 1.f) {
+                    *localCircle += 1;
+                }
+            }
+            // mask = _mm_cmple_ps(distanceSquared, ONE);
+            // hits = _mm_movemask_ps(mask);
+            // *localCircle += _mm_popcnt_u32(hits);
         }
     }
     pthread_exit((void *)localCircle);
