@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
-# include <immintrin.h>
-// #include "./SIMDxorshift/include/simdxorshift128plus.h"
+#include <immintrin.h>
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include "./sse2neon/sse2neon.h"
 // REFERENCE: https://github.com/f4exb/cm256cc/blob/master/sse2neon.h
 
 int threadCount = 0;
 long long numberOfTosses = 0;
 long long numberInCircle = 0;
+
+float genRand(unsigned int seed) {
+    return (float)rand_r(&seed)/RAND_MAX;
+}
 
 void* calculate (void* threadId) {
     long long *localCircle = (long long *)malloc(sizeof(long long));
@@ -30,7 +36,7 @@ void* calculate (void* threadId) {
 
     // __m256i randomX, randomY;
     // __m256 floatX, floatY, randX, randY, distanceSquared, mask;
-    unsigned int result[4];
+    // unsigned int result[4];
     __m128i randomX, randomY;
     __m128 floatX, floatY, randX, randY, distanceSquared, mask;
     unsigned int hits;
@@ -52,19 +58,19 @@ void* calculate (void* threadId) {
         // randY = _mm256_div_ps(floatY, MAX);
 
 
-        randX = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
-        randY = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
+        randX = _mm_set_ps(genRand(seed), genRand(seed), genRand(seed), genRand(seed));
+        randY = _mm_set_ps(genRand(seed), genRand(seed), genRand(seed), genRand(seed));
         distanceSquared = _mm_add_ps(_mm_mul_ps(randX, randX), _mm_mul_ps(randY, randY));
         
-        _mm_store_ps(val, distanceSquared);
-        for (int i = 0; i < 4; i++){
-            if (val[i] <= 1.f) {
-                *localCircle += 1;
-            }
-        }
-        // mask = _mm_cmple_ps(distanceSquared, ONE);
-        // hits = _mm_movemask_ps(mask);
-        // *localCircle += _mm_popcnt_u32(hits);
+        // _mm_store_ps(val, distanceSquared);
+        // for (int i = 0; i < 4; i++){
+        //     if (val[i] <= 1.f) {
+        //         *localCircle += 1;
+        //     }
+        // }
+        mask = _mm_cmple_ps(distanceSquared, ONE);
+        hits = _mm_movemask_ps(mask);
+        *localCircle += (long long)_mm_popcnt_u32(hits);
     }
     // if numberOfTosses is not well devided by thread#
     if (tid == 0) {
@@ -73,15 +79,15 @@ void* calculate (void* threadId) {
             randY = _mm_set_ps((float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX, (float)rand_r(&seed)/RAND_MAX);
             distanceSquared = _mm_add_ps(_mm_mul_ps(randX, randX), _mm_mul_ps(randY, randY));
 
-            _mm_store_ps(val, distanceSquared);
-            for (int i = 0; i < 4; i++){
-                if (val[i] <= 1.f) {
-                    *localCircle += 1;
-                }
-            }
-            // mask = _mm_cmple_ps(distanceSquared, ONE);
-            // hits = _mm_movemask_ps(mask);
-            // *localCircle += _mm_popcnt_u32(hits);
+            // _mm_store_ps(val, distanceSquared);
+            // for (int i = 0; i < 4; i++){
+            //     if (val[i] <= 1.f) {
+            //         *localCircle += 1;
+            //     }
+            // }
+            mask = _mm_cmple_ps(distanceSquared, ONE);
+            hits = _mm_movemask_ps(mask);
+            *localCircle += (long long)_mm_popcnt_u32(hits);
         }
     }
     pthread_exit((void *)localCircle);
